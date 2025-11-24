@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -16,7 +16,7 @@ const Register: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -38,10 +38,10 @@ const Register: React.FC = () => {
     // Ici tu peux mettre ton fetch vers le backend
     console.log("Inscription :", formData);
 
-    // Pour test, redirection vers login
+    // Pour test, redirection vers la page de connexion
     setTimeout(() => {
       setLoading(false);
-      navigate('/login');
+      navigate("/connexion");
     }, 1000);
   };
 
@@ -54,7 +54,6 @@ const Register: React.FC = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-black py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
-        
         <div className="text-center">
           <h2 className="text-4xl font-extrabold text-white">
             Créer un compte
@@ -140,20 +139,26 @@ const Register: React.FC = () => {
             type="submit"
             disabled={!isValid || loading}
             className={`w-full py-2 px-4 rounded-md text-white text-sm font-medium transition
-            ${isValid && !loading ? 'bg-blue-600 hover:bg-blue-700 shadow-lg' : 'bg-gray-600 cursor-not-allowed'}`}
+            ${
+              isValid && !loading
+                ? "bg-blue-600 hover:bg-blue-700 shadow-lg"
+                : "bg-gray-600 cursor-not-allowed"
+            }`}
           >
-            {loading ? 'Création...' : 'Créer mon compte'}
+            {loading ? "Création..." : "Créer mon compte"}
           </button>
 
           <div className="text-center mt-2">
             <span className="text-gray-300">
-              Déjà un compte ?{' '}
-              <Link to="/login" className="text-blue-400 hover:text-blue-300 font-medium">
+              Déjà un compte ?{" "}
+              <Link
+                to="/login"
+                className="text-blue-400 hover:text-blue-300 font-medium"
+              >
                 Se connecter
               </Link>
             </span>
           </div>
-
         </form>
       </div>
     </div>
