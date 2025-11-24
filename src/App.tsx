@@ -1,22 +1,15 @@
-import "./App.css";
+import { Routes, Route } from "react-router-dom";
+import Login from "./pages/login";
+import Register from "./pages/register";
+import TopRated from "./pages/TopRated"; // <-- import ici
 
 function App() {
   return (
-    <>
-      <div className="p-6 space-y-4 bg-gray-100">
-        <h1 className="text-3xl font-bold text-blue-600">
-          Tailwind fonctionne 🎉
-        </h1>
-
-        <p className="text-green-600 p-3 bg-green-100 rounded">
-          Si tu vois ce bloc en vert, c’est que Tailwind est bien installé !
-        </p>
-
-        <p className="text-red-600 p-3 bg-red-100 rounded">
-          Et si ce texte est en rouge, tout est parfait ✔️
-        </p>
-      </div>
-    </>
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/top-rated" element={<TopRated />} /> {/* <-- nouvelle route */}
+    </Routes>
   );
 }
 
