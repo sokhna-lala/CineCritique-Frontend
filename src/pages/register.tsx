@@ -1,81 +1,163 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
-export default function Register() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+const Register: React.FC = () => {
+  const navigate = useNavigate();
+
+  const [formData, setFormData] = useState({
+    username: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
 
-    if (password !== confirmPassword) {
-      alert("Les mots de passe ne correspondent pas !");
+    if (formData.password !== formData.confirmPassword) {
+      setError("Les mots de passe ne correspondent pas.");
       return;
     }
 
-    console.log("Inscription :", { email, password });
+    if (formData.password.length < 8) {
+      setError("Le mot de passe doit contenir au moins 8 caractères.");
+      return;
+    }
+
+    setLoading(true);
+
+    // Ici tu peux mettre ton fetch vers le backend
+    console.log("Inscription :", formData);
+
+    // Pour test, redirection vers login
+    setTimeout(() => {
+      setLoading(false);
+      navigate('/login');
+    }, 1000);
   };
 
+  const isValid =
+    formData.username &&
+    formData.email &&
+    formData.password &&
+    formData.confirmPassword;
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
-      <div className="w-full max-w-md bg-white p-8 rounded-xl shadow-lg">
-        <h2 className="text-2xl font-bold text-center mb-6">Créer un compte</h2>
+    <div className="min-h-screen flex items-center justify-center bg-black py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
+        
+        <div className="text-center">
+          <h2 className="text-4xl font-extrabold text-white">
+            Créer un compte
+          </h2>
+          <p className="mt-2 text-sm text-gray-400">
+            Rejoignez la communauté CinéCritique
+          </p>
+        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form
+          className="mt-8 space-y-6 bg-gray-900 p-8 rounded-2xl shadow-xl border border-gray-700"
+          onSubmit={handleSubmit}
+        >
+          {error && (
+            <div className="text-red-400 text-sm text-center font-medium mb-4">
+              {error}
+            </div>
+          )}
 
-          <div>
-            <label className="block mb-1 font-medium">Email</label>
-            <input
-              type="email"
-              className="w-full p-3 border rounded-lg"
-              placeholder="exemple@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-300">
+                Votre pseudo
+              </label>
+              <input
+                name="username"
+                type="text"
+                required
+                value={formData.username}
+                onChange={handleChange}
+                className="mt-1 w-full px-3 py-2 bg-gray-800 text-white placeholder-gray-400 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Votre pseudo"
+              />
+            </div>
 
-          <div>
-            <label className="block mb-1 font-medium">Mot de passe</label>
-            <input
-              type="password"
-              className="w-full p-3 border rounded-lg"
-              placeholder="********"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300">
+                Adresse email
+              </label>
+              <input
+                name="email"
+                type="email"
+                required
+                value={formData.email}
+                onChange={handleChange}
+                className="mt-1 w-full px-3 py-2 bg-gray-800 text-white placeholder-gray-400 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="votre@email.com"
+              />
+            </div>
 
-          <div>
-            <label className="block mb-1 font-medium">Confirmer le mot de passe</label>
-            <input
-              type="password"
-              className="w-full p-3 border rounded-lg"
-              placeholder="********"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-            />
+            <div>
+              <label className="block text-sm font-medium text-gray-300">
+                Mot de passe (minimum 8 caractères)
+              </label>
+              <input
+                name="password"
+                type="password"
+                required
+                value={formData.password}
+                onChange={handleChange}
+                className="mt-1 w-full px-3 py-2 bg-gray-800 text-white placeholder-gray-400 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="********"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300">
+                Confirmer le mot de passe
+              </label>
+              <input
+                name="confirmPassword"
+                type="password"
+                required
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                className="mt-1 w-full px-3 py-2 bg-gray-800 text-white placeholder-gray-400 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="********"
+              />
+            </div>
           </div>
 
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg"
+            disabled={!isValid || loading}
+            className={`w-full py-2 px-4 rounded-md text-white text-sm font-medium transition
+            ${isValid && !loading ? 'bg-blue-600 hover:bg-blue-700 shadow-lg' : 'bg-gray-600 cursor-not-allowed'}`}
           >
-            S’inscrire
+            {loading ? 'Création...' : 'Créer mon compte'}
           </button>
 
-        </form>
+          <div className="text-center mt-2">
+            <span className="text-gray-300">
+              Déjà un compte ?{' '}
+              <Link to="/login" className="text-blue-400 hover:text-blue-300 font-medium">
+                Se connecter
+              </Link>
+            </span>
+          </div>
 
-        <p className="text-center mt-4 text-sm">
-          Vous avez déjà un compte ?{" "}
-          <Link to="/login" className="text-blue-600 hover:underline">
-            Se connecter
-          </Link>
-        </p>
+        </form>
       </div>
     </div>
   );
-}
+};
+
+export default Register;

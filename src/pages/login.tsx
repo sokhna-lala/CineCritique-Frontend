@@ -55,7 +55,7 @@ const Login: React.FC = () => {
 
         <div className="text-center">
           <h2 className="text-4xl font-extrabold text-white">
-            Connexion
+            connexion
           </h2>
           <p className="mt-2 text-sm text-gray-400">
             Accédez à votre espace personnel
