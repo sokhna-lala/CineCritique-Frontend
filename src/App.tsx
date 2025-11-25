@@ -3,13 +3,10 @@ import Header from "./components/Header";
 import PageAccueil from "./pages/PageAccueil";
 import Login from "./pages/login";
 import Register from "./pages/register";
-<<<<<<< HEAD
 import TopRated from "./pages/TopRated";
-import Profile from "./pages/profile"; // <-- nouvelle page Profil utilisateur
-=======
+import Profile from "./pages/profile";
 import Films from "./pages/Films";
 import MovieDetail from "./pages/MovieDetail";
->>>>>>> page-films
 
 export default function App() {
   return (
@@ -27,17 +24,22 @@ export default function App() {
 
         {/* Page d'inscription */}
         <Route path="/register" element={<Register />} />
-<<<<<<< HEAD
 
         {/* Top Rated */}
         <Route path="/top-rated" element={<TopRated />} />
+        <Route
+          path="/classements"
+          element={<Navigate to="/top-rated" replace />}
+        />
 
         {/* Profil utilisateur */}
+        <Route path="/profile" element={<Profile />} />
         <Route path="/profile/:username" element={<Profile />} />
-=======
+        <Route path="/profil" element={<Navigate to="/profile" replace />} />
+
+        {/* Films */}
         <Route path="/films" element={<Films />} />
         <Route path="/films/:id" element={<MovieDetail />} />
->>>>>>> page-films
       </Routes>
     </>
   );
