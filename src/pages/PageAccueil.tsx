@@ -180,9 +180,11 @@ function PopularMovies() {
     posterName?: string;
     rating?: number;
     overview?: string;
+    genre_ids?: number[];
   };
 
   const [movies, setMovies] = useState<Movie[]>(MOCK_MOVIES);
+  const [genres, setGenres] = useState<{ id: number; name: string }[]>([]);
 
   // Charger posters locaux depuis src/assets/posters (nommez vos fichiers par ex. "1.jpg", "2.jpg"...)
   const posterModules = import.meta.glob("../assets/posters/*.{png,jpg,jpeg}", {
@@ -212,6 +214,14 @@ function PopularMovies() {
 
     if (!key) return; // keep mockMovies if no key
 
+    // fetch genres list for mapping ids to names
+    fetch(
+      `https://api.themoviedb.org/3/genre/movie/list?api_key=${key}&language=fr-FR`
+    )
+      .then((r) => r.json())
+      .then((d) => setGenres(d.genres || []))
+      .catch(() => setGenres([]));
+
     type TMDBMovie = {
       id: number;
       title?: string;
@@ -234,6 +244,7 @@ function PopularMovies() {
             : undefined,
           rating: m.vote_average,
           overview: m.overview,
+          genre_ids: (m as any).genre_ids,
         }));
         setMovies(items);
       })
@@ -282,6 +293,16 @@ function PopularMovies() {
           <div className="p-4">
             <h4 className="font-semibold text-lg">{m.title}</h4>
             <p className="text-sm text-gray-300 mt-1">{m.overview}</p>
+
+            {m.genre_ids && genres.length > 0 && (
+              <p className="text-xs text-gray-400 mt-1">
+                {m.genre_ids
+                  .map((id) => genres.find((g) => g.id === id)?.name)
+                  .filter(Boolean)
+                  .slice(0, 2)
+                  .join(", ")}
+              </p>
+            )}
 
             <div className="mt-3 flex items-center justify-between">
               <span className="text-yellow-400 font-medium">
