@@ -16,17 +16,12 @@ const Register: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-
-    setFormData((prev) => ({ 
-      ...prev, 
-      [name]: value 
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Vérification mot de passe
     if (formData.password !== formData.confirmPassword) {
       setError("Les mots de passe ne correspondent pas.");
       return;
@@ -34,7 +29,6 @@ const Register: React.FC = () => {
 
     setLoading(true);
 
-    // Simulation d'inscription réussie
     setTimeout(() => {
       setLoading(false);
       navigate("/connexion");
@@ -49,7 +43,6 @@ const Register: React.FC = () => {
         {error && <p className="text-red-500 mb-3 text-center">{error}</p>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-
           <input
             type="text"
             name="username"
@@ -69,3 +62,45 @@ const Register: React.FC = () => {
             className="w-full p-3 rounded-lg bg-gray-700 focus:outline-none"
             required
           />
+
+          <input
+            type="password"
+            name="password"
+            placeholder="Mot de passe"
+            value={formData.password}
+            onChange={handleChange}
+            className="w-full p-3 rounded-lg bg-gray-700 focus:outline-none"
+            required
+          />
+
+          <input
+            type="password"
+            name="confirmPassword"
+            placeholder="Confirmez le mot de passe"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            className="w-full p-3 rounded-lg bg-gray-700 focus:outline-none"
+            required
+          />
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full p-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold"
+          >
+            {loading ? "Inscription..." : "Créer un compte"}
+          </button>
+        </form>
+
+        <p className="mt-4 text-center text-gray-400">
+          Déjà un compte ?{" "}
+          <Link to="/connexion" className="text-blue-400 hover:underline">
+            Se connecter
+          </Link>
+        </p>
+      </div>
+    </div>
+  );
+};
+
+export default Register;
