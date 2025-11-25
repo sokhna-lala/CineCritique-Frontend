@@ -4,6 +4,7 @@ import PageAccueil from "./pages/PageAccueil";
 import Login from "./pages/login";
 import Register from "./pages/register";
 import TopRated from "./pages/TopRated";
+import Profile from "./pages/profile"; // <-- nouvelle page Profil utilisateur
 
 export default function App() {
   return (
@@ -24,6 +25,9 @@ export default function App() {
 
         {/* Top Rated */}
         <Route path="/top-rated" element={<TopRated />} />
+
+        {/* Profil utilisateur */}
+        <Route path="/profile/:username" element={<Profile />} />
       </Routes>
     </>
   );
