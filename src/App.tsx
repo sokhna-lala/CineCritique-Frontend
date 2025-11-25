@@ -1,16 +1,30 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
+import Header from "./components/Header";
+import PageAccueil from "./pages/PageAccueil";
 import Login from "./pages/login";
 import Register from "./pages/register";
-import TopRated from "./pages/TopRated"; // <-- import ici
+import TopRated from "./pages/TopRated";
 
-function App() {
+export default function App() {
   return (
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/top-rated" element={<TopRated />} /> {/* <-- nouvelle route */}
-    </Routes>
+    <>
+      <Header />
+      <Routes>
+        {/* Page d'accueil */}
+        <Route path="/" element={<PageAccueil />} />
+
+        {/* Page de connexion */}
+        <Route path="/connexion" element={<Login />} />
+
+        {/* Redirection de /login vers /connexion */}
+        <Route path="/login" element={<Navigate to="/connexion" replace />} />
+
+        {/* Page d'inscription */}
+        <Route path="/register" element={<Register />} />
+
+        {/* Top Rated */}
+        <Route path="/top-rated" element={<TopRated />} />
+      </Routes>
+    </>
   );
 }
-
-export default App;

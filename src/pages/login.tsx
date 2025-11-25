@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+    email: "",
+    password: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -14,140 +14,70 @@ const Login: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prevState => ({
+
+    setFormData((prevState) => ({
       ...prevState,
-      [name]: value
+      [name]: value,
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
     setLoading(true);
 
-    try {
-      const response = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        navigate('/');
-      } else {
-        setError(data.message || 'Email ou mot de passe incorrect.');
-      }
-    } catch (err) {
-      setError('Une erreur est survenue. Veuillez réessayer.');
-    } finally {
+    // Simulation d'une connexion réussie
+    setTimeout(() => {
       setLoading(false);
-    }
+      navigate("/"); // Redirection après connexion
+    }, 1500);
   };
 
-  const isFormValid = formData.email && formData.password;
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center p-4">
+      <div className="bg-gray-800 p-8 rounded-2xl shadow-xl w-full max-w-md">
+        <h1 className="text-2xl font-bold mb-6 text-center">Connexion</h1>
 
-      <div className="max-w-md w-full space-y-8">
+        {error && <p className="text-red-500 mb-3 text-center">{error}</p>}
 
-        <div className="text-center">
-          <h2 className="text-4xl font-extrabold text-white">
-            connenpmxion
-          </h2>
-          <p className="mt-2 text-sm text-gray-400">
-            Accédez à votre espace personnel
-          </p>
-        </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Email */}
+          <input
+            type="email"
+            name="email"
+            placeholder="Votre email"
+            value={formData.email}
+            onChange={handleChange}
+            className="w-full p-3 rounded-lg bg-gray-700 focus:outline-none"
+            required
+          />
 
-        <form
-          className="mt-8 space-y-6 
-            bg-gray-900 p-8 rounded-2xl shadow-xl 
-            border border-gray-700"
-          onSubmit={handleSubmit}
-        >
-          <div className="space-y-4">
+          {/* Mot de passe */}
+          <input
+            type="password"
+            name="password"
+            placeholder="Votre mot de passe"
+            value={formData.password}
+            onChange={handleChange}
+            className="w-full p-3 rounded-lg bg-gray-700 focus:outline-none"
+            required
+          />
 
-            {error && (
-              <div className="text-red-400 text-sm text-center font-medium">
-                {error}
-              </div>
-            )}
-
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-300">
-                Adresse email
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={formData.email}
-                onChange={handleChange}
-                className="mt-1 w-full px-3 py-2 
-                  bg-gray-800 text-white 
-                  placeholder-gray-400 
-                  border border-gray-700 rounded-md
-                  focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="exemple@email.com"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-300">
-                Mot de passe
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                value={formData.password}
-                onChange={handleChange}
-                className="mt-1 w-full px-3 py-2 
-                  bg-gray-800 text-white 
-                  placeholder-gray-400 
-                  border border-gray-700 rounded-md
-                  focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Votre mot de passe"
-              />
-            </div>
-          </div>
-
-          <div className="flex justify-between">
-            <Link to="/forgot-password" className="text-sm text-blue-400 hover:text-blue-300">
-              Mot de passe oublié ?
-            </Link>
-          </div>
-
+          {/* Bouton */}
           <button
             type="submit"
-            disabled={!isFormValid || loading}
-            className={`w-full py-2 px-4 rounded-md text-white text-sm font-medium transition
-              ${isFormValid && !loading
-                ? 'bg-blue-600 hover:bg-blue-700 shadow-lg'
-                : 'bg-gray-600 cursor-not-allowed'}
-            `}
+            disabled={loading}
+            className="w-full p-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold"
           >
-            {loading ? 'Connexion...' : 'connectez-vous'}
+            {loading ? "Connexion..." : "Se connecter"}
           </button>
-
-          <div className="text-center mt-2">
-            <span className="text-gray-300">
-              Pas encore de compte ?{' '}
-              <Link to="/register" className="text-blue-400 hover:text-blue-300 font-medium">
-                S'inscrire
-              </Link>
-            </span>
-          </div>
-
         </form>
 
+        <p className="mt-4 text-center text-gray-400">
+          Pas de compte ?{" "}
+          <Link to="/register" className="text-blue-400 hover:underline">
+            S’inscrire
+          </Link>
+        </p>
       </div>
     </div>
   );
