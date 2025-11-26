@@ -15,7 +15,7 @@ const Header: React.FC = () => {
         <Link to="/films" className="hover:text-orange-500">
           films
         </Link>
-        <Link to="/classements" className="hover:text-orange-500">
+        <Link to="/top-rated" className="hover:text-orange-500">
           classements
         </Link>
         <Link to="/profil" className="hover:text-orange-500">
