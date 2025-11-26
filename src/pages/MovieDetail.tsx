@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { DEFAULT_MOCK_MOVIES } from "../data/mockMovies";
 import type { Movie, CastMember } from "../data/mockMovies";
+import { DEFAULT_MOCK_REVIEWS } from "../data/mockReviews";
+import type { Review } from "../data/mockReviews";
 
 type TMDBGenre = { id: number; name: string };
 type TMDBCredits = {
@@ -18,6 +20,8 @@ export default function MovieDetail() {
   const [movie, setMovie] = useState<Movie | null>(null);
   const [cast, setCast] = useState<CastMember[]>([]);
   const [loading, setLoading] = useState(true);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [newReview, setNewReview] = useState({ author: "", rating: 5, text: "" });
 
   const tmdbKey = (
     import.meta as unknown as { env: Record<string, string | undefined> }
@@ -43,6 +47,11 @@ export default function MovieDetail() {
   useEffect(() => {
     if (!id) return;
     fetchDetail();
+    // Load reviews for this movie
+    const movieReviews = DEFAULT_MOCK_REVIEWS.filter(
+      (r) => String(r.movieId) === String(id) || r.movieId === Number(id)
+    );
+    setReviews(movieReviews);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
@@ -121,6 +130,43 @@ export default function MovieDetail() {
     }
   };
 
+  const handleAddReview = () => {
+    if (!newReview.author.trim() || !newReview.text.trim()) {
+      alert("Veuillez remplir tous les champs");
+      return;
+    }
+
+    const review: Review = {
+      id: Math.max(...reviews.map((r) => r.id), 0) + 1,
+      movieId: Number(id),
+      author: newReview.author,
+      rating: newReview.rating,
+      text: newReview.text,
+      date: new Date().toISOString().split("T")[0],
+    };
+
+    setReviews([...reviews, review]);
+    setNewReview({ author: "", rating: 5, text: "" });
+  };
+
+  const StarRating = ({ rating, onRate }: { rating: number; onRate?: (r: number) => void }) => {
+    return (
+      <div className="flex gap-1">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <button
+            key={star}
+            onClick={() => onRate?.(star)}
+            className={`text-xl transition ${
+              star <= rating ? "text-yellow-400" : "text-gray-600"
+            } ${onRate ? "cursor-pointer hover:text-yellow-300" : ""}`}
+          >
+            ★
+          </button>
+        ))}
+      </div>
+    );
+  };
+
   if (!id) return <div>Film introuvable</div>;
 
   return (
@@ -176,7 +222,7 @@ export default function MovieDetail() {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-3">
                   {cast.map((c) => (
                     <div key={c.id} className="text-center">
-                      <div className="w-full h-40 bg-gradient-to-br from-orange-400 to-orange-600 rounded flex items-center justify-center mb-2">
+                      <div className="w-full h-40 bg-linear-to-br from-orange-400 to-orange-600 rounded flex items-center justify-center mb-2">
                         <div className="text-white text-center px-2">
                           <div className="text-xs font-semibold truncate">{c.name}</div>
                         </div>
@@ -185,6 +231,88 @@ export default function MovieDetail() {
                       <div className="text-xs text-gray-400">{c.character}</div>
                     </div>
                   ))}
+                </div>
+              </div>
+
+              <div className="mt-8">
+                <h3 className="text-xl font-semibold mb-4">Critiques ({reviews.length})</h3>
+
+                <div className="space-y-4 mb-8">
+                  {reviews.length === 0 ? (
+                    <p className="text-gray-400">Aucune critique pour le moment.</p>
+                  ) : (
+                    reviews.map((review) => (
+                      <div key={review.id} className="bg-gray-800 rounded p-4">
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <div className="font-semibold">{review.author}</div>
+                            <div className="text-sm text-gray-400">{review.date}</div>
+                          </div>
+                          <StarRating rating={review.rating} />
+                        </div>
+                        <p className="text-gray-200 text-sm">{review.text}</p>
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                <div className="bg-gray-800 rounded p-6">
+                  <h4 className="font-semibold mb-4">Ajouter une critique</h4>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Votre nom
+                      </label>
+                      <input
+                        type="text"
+                        value={newReview.author}
+                        onChange={(e) =>
+                          setNewReview({ ...newReview, author: e.target.value })
+                        }
+                        placeholder="Entrez votre nom"
+                        className="w-full bg-gray-700 text-white px-3 py-2 rounded border border-gray-600 focus:border-orange-400 outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Votre note
+                      </label>
+                      <div className="flex gap-2 items-center">
+                        <StarRating
+                          rating={newReview.rating}
+                          onRate={(r) =>
+                            setNewReview({ ...newReview, rating: r })
+                          }
+                        />
+                        <span className="text-sm text-gray-400">
+                          {newReview.rating}/5
+                        </span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Votre critique
+                      </label>
+                      <textarea
+                        value={newReview.text}
+                        onChange={(e) =>
+                          setNewReview({ ...newReview, text: e.target.value })
+                        }
+                        placeholder="Écrivez votre critique ici..."
+                        rows={4}
+                        className="w-full bg-gray-700 text-white px-3 py-2 rounded border border-gray-600 focus:border-orange-400 outline-none resize-none"
+                      />
+                    </div>
+
+                    <button
+                      onClick={handleAddReview}
+                      className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 rounded transition"
+                    >
+                      Soumettre la critique
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
