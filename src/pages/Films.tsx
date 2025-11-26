@@ -1,19 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-
-type Movie = {
-  id: number;
-  title: string;
-  overview?: string;
-  poster?: string;
-  release_date?: string;
-  vote_average?: number;
-  genre_ids?: number[];
-};
+import { DEFAULT_MOCK_MOVIES } from "../data/mockMovies";
+import type { Movie } from "../data/mockMovies";
 
 type Genre = { id: number; name: string };
-
-import { DEFAULT_MOCK_MOVIES } from "../data/mockMovies";
 
 export default function Films() {
   const [query, setQuery] = useState("");
@@ -203,7 +193,14 @@ export default function Films() {
       // simple client-side search on DEFAULT_MOCK_MOVIES
       const results = DEFAULT_MOCK_MOVIES.filter((m) =>
         m.title.toLowerCase().includes(query.toLowerCase())
-      );
+      ).map((m, idx) => ({
+        ...m,
+        poster:
+          postersByName[`${m.id}.png`] ||
+          postersByName[String(m.id)] ||
+          postersByName[`${m.id}.jpg`] ||
+          m.poster,
+      }));
       setMovies(results);
       return;
     }
@@ -261,7 +258,29 @@ export default function Films() {
           <div className="flex-1 w-full">
             <input
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={async (e) => {
+                const value = e.target.value;
+                setQuery(value);
+                // Recherche instantanée dès la saisie
+                if (value.trim() !== "") {
+                  await search();
+                } else {
+                  // Si le champ est vide, réinitialise la liste complète
+                  if (!tmdbKey) {
+                    const withPosters = DEFAULT_MOCK_MOVIES.map((m) => ({
+                      ...m,
+                      poster:
+                        postersByName[`${m.id}.png`] ||
+                        postersByName[String(m.id)] ||
+                        postersByName[`${m.id}.jpg`] ||
+                        m.poster,
+                    }));
+                    setMovies(withPosters);
+                  } else {
+                    await fetchPopular();
+                  }
+                }
+              }}
               placeholder="Rechercher par titre..."
               className="w-full px-4 py-2 rounded bg-gray-800 border border-gray-700"
             />
