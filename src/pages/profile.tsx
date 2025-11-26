@@ -1,7 +1,16 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import StarRating from './StarRating';
 
-// Interface TypeScript pour les films
+interface User {
+  username: string;
+  fullName: string;
+  avatar: string;
+  email: string;
+  bio: string;
+  joinDate: string;
+}
+
 interface Movie {
   id: number;
   title: string;
@@ -9,449 +18,351 @@ interface Movie {
   year: number;
   rating: number;
   image: string;
+  genre: string;
+}
+
+interface Review {
+  id: number;
+  movieId: number;
+  username: string;
+  text: string;
+  rating: number;
+  date: string;
 }
 
 const Profile: React.FC = () => {
-  // Données utilisateur simulées
-  const user = {
-    username: "gora",
-    email: "gora@example.com",
-    bio: "Passionné de cinéma 🎬 - Amateur de films d'auteur et de blockbusters. Je partage mes découvertes et coups de cœur cinématographiques.",
-    avatar: "https://i.pravatar.cc/150?u=gora",
-    memberSince: "Janvier 2023",
-    favoriteCount: 32,
-  };
-
-  // Données films simulées avec URLs TMDB CORRIGÉES
-  const movies: Movie[] = [
-    {
-      id: 1,
-      title: "Dune: Part Two",
-      description:
-        "Paul Atreides s'allie avec Chani et les Fremen pour venger sa famille.",
-      year: 2024,
-      rating: 4.5,
-      image: "https://image.tmdb.org/t/p/w500/8b8R8l88Qje9dn9OE8PY05Nxl1X.jpg",
+  const { username } = useParams<{ username: string }>();
+  const navigate = useNavigate();
+  
+  // Données initiales
+  const initialUsers: User[] = [
+    { 
+      username: "gora", 
+      fullName: "Gora Leye", 
+      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+      email: "gora@example.com",
+      bio: "Passionné de cinéma d'auteur et de films africains. Critique amateur depuis 5 ans. J'adore découvrir des pépites méconnues ! 🎬",
+      joinDate: "2023-01-15"
     },
-    {
-      id: 2,
-      title: "Oppenheimer",
-      description:
-        "L'histoire du physicien J. Robert Oppenheimer et son rôle dans le développement de la bombe atomique.",
-      year: 2023,
-      rating: 4.8,
-      image: "https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg",
-    },
-    {
-      id: 3,
-      title: "Spider-Man: Across the Spider-Verse",
-      description:
-        "Miles Morales traverse le multivers et rencontre une équipe de Spider-People.",
-      year: 2023,
-      rating: 4.7,
-      image: "https://image.tmdb.org/t/p/w500/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg",
-    },
-    {
-      id: 4,
-      title: "The Batman",
-      description:
-        "Batman enquête sur la corruption à Gotham City et affronte le Sphinx.",
-      year: 2022,
-      rating: 4.3,
-      image: "https://image.tmdb.org/t/p/w500/74xTEgt7R36Fpooo50r9T25onhq.jpg",
-    },
-    {
-      id: 5,
-      title: "Top Gun: Maverick",
-      description:
-        "Après plus de trente ans de service, Maverick est confronté à son passé.",
-      year: 2022,
-      rating: 4.6,
-      image: "https://image.tmdb.org/t/p/w500/62HCnUTziyWcpDaBO2i1DX17ljH.jpg",
-    },
-    {
-      id: 6,
-      title: "Avatar: The Way of Water",
-      description:
-        "Jake Sully et Ney'tiri forment une famille sur Pandora et doivent affronter de nouvelles menaces.",
-      year: 2022,
-      rating: 4.2,
-      image: "https://image.tmdb.org/t/p/w500/t6HIqrRAclMCA60NsSmeqe9RmNV.jpg",
-    },
-    {
-      id: 7,
-      title: "Everything Everywhere All at Once",
-      description:
-        "Une femme chinoise plonge dans des univers parallèles pour empêcher la destruction de tout.",
-      year: 2022,
-      rating: 4.9,
-      image: "https://image.tmdb.org/t/p/w500/w3LxiVYdWWRvEVdn5RYq6jIqkb1.jpg",
-    },
-    {
-      id: 8,
-      title: "Black Panther: Wakanda Forever",
-      description:
-        "Le peuple du Wakanda se bat pour protéger sa nation après la mort du roi T'Challa.",
-      year: 2022,
-      rating: 4.1,
-      image: "https://image.tmdb.org/t/p/w500/sv1xJUazXeYqALzczSZ3O6nkH75.jpg",
-    },
-    {
-      id: 9,
-      title: "The Super Mario Bros. Movie",
-      description:
-        "Mario et Luigi, plombiers de Brooklyn, se retrouvent dans un nouveau monde magique.",
-      year: 2023,
-      rating: 4.0,
-      image: "https://image.tmdb.org/t/p/w500/qNBAXBIQlnOThrVvA6mA2B5ggV6.jpg",
-    },
-    {
-      id: 10,
-      title: "John Wick: Chapter 4",
-      description:
-        "John Wick découvre un moyen de vaincre le Haut-Tableau, mais il doit affronter un nouvel ennemi.",
-      year: 2023,
-      rating: 4.4,
-      image: "https://image.tmdb.org/t/p/w500/vZloFAK7NmvMGKE7VkF5UHaz0I.jpg",
-    },
-    {
-      id: 11,
-      title: "Guardians of the Galaxy Vol. 3",
-      description:
-        "Les Gardiens de la Galaxie doivent protéger l'un des leurs et terminer leur mission.",
-      year: 2023,
-      rating: 4.3,
-      image: "https://image.tmdb.org/t/p/w500/r2J02Z2OpNTctfOSN1Ydgii51I3.jpg",
-    },
-    {
-      id: 12,
-      title: "Barbie",
-      description:
-        "Barbie quitte Barbie Land pour le monde réel à la recherche du bonheur parfait.",
-      year: 2023,
-      rating: 4.2,
-      image: "https://image.tmdb.org/t/p/w500/iuFNMS8U5cb6xfzi51Dbkovj7vM.jpg",
-    },
-    {
-      id: 13,
-      title: "Mission: Impossible - Dead Reckoning Part One",
-      description:
-        "Ethan Hunt et son équipe traquent une nouvelle arme terrifiante.",
-      year: 2023,
-      rating: 4.3,
-      image: "https://image.tmdb.org/t/p/w500/NNxYkU70HPurnNCSiCjYAmacwm.jpg",
-    },
-    {
-      id: 14,
-      title: "The Little Mermaid",
-      description:
-        "Ariel, jeune sirène, rêve de découvrir le monde des humains.",
-      year: 2023,
-      rating: 3.9,
-      image: "https://image.tmdb.org/t/p/w500/ym1dxyOk4jFcSl4Q2zmRrA5BEEN.jpg",
-    },
-    {
-      id: 15,
-      title: "Ant-Man and the Wasp: Quantumania",
-      description: "Scott Lang et Hope van Dyne explorent le Monde Quantique.",
-      year: 2023,
-      rating: 3.8,
-      image: "https://image.tmdb.org/t/p/w500/qnqGbB22YJ7dSs4o6M7exTpNxPz.jpg",
-    },
-    {
-      id: 16,
-      title: "Creed III",
-      description:
-        "Adonis Creed affronte un ami d'enfance devenu rival dans le monde de la boxe.",
-      year: 2023,
-      rating: 4.1,
-      image: "https://image.tmdb.org/t/p/w500/cvsXj3I9Q2iyyIo95AecSd1tad7.jpg",
-    },
-    {
-      id: 17,
-      title: "The Flash",
-      description:
-        "Barry Allen utilise ses pouvoirs pour voyager dans le temps et changer le passé.",
-      year: 2023,
-      rating: 3.7,
-      image: "https://image.tmdb.org/t/p/w500/rktDFPbfHfUbArZ6OOOKsXcv0Bm.jpg",
-    },
-    {
-      id: 18,
-      title: "Transformers: Rise of the Beasts",
-      description:
-        "Les Autobots affrontent une nouvelle menace terrifiante venue des étoiles.",
-      year: 2023,
-      rating: 3.9,
-      image: "https://image.tmdb.org/t/p/w500/gPbM0MK8CP8A174rmUwGsADNYKD.jpg",
-    },
-    {
-      id: 19,
-      title: "Fast X",
-      description:
-        "Dom Toretto et sa famille affrontent leur ennemi le plus redoutable.",
-      year: 2023,
-      rating: 3.8,
-      image: "https://image.tmdb.org/t/p/w500/fiVW06jE7z9YnO4trhaMEdclSiC.jpg",
-    },
-    {
-      id: 20,
-      title: "The Marvels",
-      description:
-        "Carol Danvers, Monica Rambeau et Kamala Khan unissent leurs forces.",
-      year: 2023,
-      rating: 3.6,
-      image: "https://image.tmdb.org/t/p/w500/9GBhzXMFjgcZ3FdR9w3bUMMTps5.jpg",
-    },
-    {
-      id: 21,
-      title: "Wonka",
-      description:
-        "L'histoire du jeune Willy Wonka et comment il est devenu le chocolatier légendaire.",
-      year: 2023,
-      rating: 4.1,
-      image: "https://image.tmdb.org/t/p/w500/qhb1qOilapbapxWQn9jtRCMwXJF.jpg",
-    },
-    {
-      id: 22,
-      title: "Killers of the Flower Moon",
-      description:
-        "Une enquête sur une série de meurtres dans la nation Osage dans les années 1920.",
-      year: 2023,
-      rating: 4.4,
-      image: "https://image.tmdb.org/t/p/w500/dB6Krk806zeqd0YNp2ngQ9zXteH.jpg",
-    },
-    {
-      id: 23,
-      title: "Napoleon",
-      description:
-        "L'ascension et la chute de l'empereur français Napoléon Bonaparte.",
-      year: 2023,
-      rating: 4.0,
-      image: "https://image.tmdb.org/t/p/w500/jE5o7y9K6pZtWNNMEw3IdpHuncR.jpg",
-    },
-    {
-      id: 24,
-      title: "The Hunger Games: The Ballad of Songbirds & Snakes",
-      description:
-        "Coriolanus Snow devient le mentor de Lucy Gray Baird lors de la 10e édition des Hunger Games.",
-      year: 2023,
-      rating: 4.1,
-      image: "https://image.tmdb.org/t/p/w500/iiXliCeykkzmJ0Eg9RYJ7F2CWSz.jpg",
-    },
-    {
-      id: 25,
-      title: "Godzilla Minus One",
-      description:
-        "Le Japon doit affronter Godzilla dans l'immédiat après-guerre.",
-      year: 2023,
-      rating: 4.6,
-      image: "https://image.tmdb.org/t/p/w500/gkseI3CUfQtMKX41XD4AxDzhQb7.jpg",
-    },
-    {
-      id: 26,
-      title: "Poor Things",
-      description:
-        "Une jeune femme se réincarne et découvre la vie sous un nouveau jour.",
-      year: 2023,
-      rating: 4.5,
-      image: "https://image.tmdb.org/t/p/w500/kCGlIMHnOm8JPXq3rXM6c5wMxcT.jpg",
-    },
-    {
-      id: 27,
-      title: "The Creator",
-      description:
-        "Dans une guerre entre humains et IA, un ancien agent est chargé de tuer le Créateur.",
-      year: 2023,
-      rating: 4.0,
-      image: "https://image.tmdb.org/t/p/w500/vBZ0qvaRxqEhZwl6LWmruJqWE8Z.jpg",
-    },
-    {
-      id: 28,
-      title: "Elemental",
-      description:
-        "Dans une ville où les habitants du feu, de l'eau, de la terre et de l'air cohabitent.",
-      year: 2023,
-      rating: 4.0,
-      image: "https://image.tmdb.org/t/p/w500/4Y1WNkd88JXmGfhtWR7dmDAo1T2.jpg",
-    },
-    {
-      id: 29,
-      title: "The Killer",
-      description:
-        "Un tueur à gages solitaire commence à avoir une crise psychologique.",
-      year: 2023,
-      rating: 4.2,
-      image: "https://image.tmdb.org/t/p/w500/e7Jvsry47JJQruuezjU2X1Z6J77.jpg",
-    },
-    {
-      id: 30,
-      title: "Past Lives",
-      description:
-        "Nora et Hae Sung, amis d'enfance, sont réunis pour une semaine à New York.",
-      year: 2023,
-      rating: 4.5,
-      image: "https://image.tmdb.org/t/p/w500/k3waqVXSnvCZWfJYNtdamTgTtTA.jpg",
+    { 
+      username: "aicha", 
+      fullName: "Aicha Ndiaye", 
+      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face",
+      email: "aicha@example.com",
+      bio: "Amateur de blockbusters et de films d'action. Je partage mes coups de cœur et découvertes chaque semaine ! 💥",
+      joinDate: "2023-03-20"
     },
   ];
 
-  // Composant pour afficher les étoiles de notation avec demi-étoiles
-  const StarRating: React.FC<{ rating: number }> = ({ rating }) => {
+  const movies: Movie[] = [
+    { 
+      id: 1, 
+      title: "Dune : Deuxième partie", 
+      description: "Paul Atreides s'allie avec Chani et les Fremen pour venger son père.", 
+      year: 2024, 
+      rating: 4.5, 
+      image: "https://images.unsplash.com/photo-1635805737707-575885ab0820?w=300&h=450&fit=crop",
+      genre: "Science-Fiction"
+    },
+    { 
+      id: 2, 
+      title: "Oppenheimer", 
+      description: "Histoire épique de J. Robert Oppenheimer et la bombe atomique.", 
+      year: 2023, 
+      rating: 4.8, 
+      image: "https://images.unsplash.com/photo-1509347528160-9a9e33742cdb?w=300&h=450&fit=crop",
+      genre: "Biographique"
+    },
+    { 
+      id: 3, 
+      title: "Interstellar", 
+      description: "Voyage à travers un trou de ver pour sauver l'humanité.", 
+      year: 2014, 
+      rating: 4.7, 
+      image: "https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?w=300&h=450&fit=crop",
+      genre: "Science-Fiction"
+    },
+    { 
+      id: 4, 
+      title: "Les Gardiens de la Galaxie 3", 
+      description: "Les Gardiens affrontent de nouveaux défis pour protéger l'univers.", 
+      year: 2023, 
+      rating: 4.2, 
+      image: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=300&h=450&fit=crop",
+      genre: "Action"
+    },
+  ];
+
+  const reviews: Review[] = [
+    // Critiques de Gora (positives et négatives)
+    { id: 1, movieId: 1, username: "gora", text: "Chef d'œuvre cinématographique ! La photographie est magnifique, l'histoire captivante, et la bande-son sublime. Denis Villeneuve a réussi à transcender l'œuvre de Frank Herbert.", rating: 5, date: "2024-03-10" },
+    { id: 2, movieId: 2, username: "gora", text: "Performance magistrale de Cillian Murphy. Un film profond qui questionne la morale et la responsabilité scientifique. La réalisation de Nolan est impeccable.", rating: 4, date: "2024-03-09" },
+    { id: 3, movieId: 4, username: "gora", text: "Décevant. L'humour forcé et le scénario prévisible gâchent l'expérience. Les premiers opus étaient bien meilleurs.", rating: 2, date: "2024-03-08" },
+    
+    // Critiques d'Aicha (positives et négatives)
+    { id: 4, movieId: 1, username: "aicha", text: "Visuellement impressionnant mais un peu long à mon goût. Certaines scènes auraient pu être raccourcies sans perdre l'essence du film.", rating: 3, date: "2024-03-11" },
+    { id: 5, movieId: 3, username: "aicha", text: "Une odyssée spatiale émouvante ! La relation père-fille touche en plein cœur. Les effets spéciaux sont toujours aussi impressionnants.", rating: 5, date: "2024-03-08" },
+    { id: 6, movieId: 4, username: "aicha", text: "Action et émotions au rendez-vous ! James Gunn conclut sa trilogie en beauté. Les scènes de combat sont incroyables.", rating: 4, date: "2024-03-07" },
+  ];
+
+  const [users, setUsers] = useState<User[]>([]);
+  const [profileUser, setProfileUser] = useState<User | null>(null);
+  const [userReviews, setUserReviews] = useState<(Review & { movie: Movie })[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Charger les données depuis localStorage ou utiliser les données initiales
+  useEffect(() => {
+    const loadUsers = () => {
+      const savedUsers = localStorage.getItem('cinecritique_users');
+      if (savedUsers) {
+        return JSON.parse(savedUsers);
+      }
+      // Initialiser localStorage avec les données initiales
+      localStorage.setItem('cinecritique_users', JSON.stringify(initialUsers));
+      return initialUsers;
+    };
+
+    const usersData = loadUsers();
+    setUsers(usersData);
+  }, []);
+
+  useEffect(() => {
+    if (users.length === 0) return;
+
+    // Déterminer l'utilisateur connecté (simulé comme "gora")
+    const currentUsername = "gora";
+    
+    // Déterminer l'utilisateur du profil à afficher
+    const profileUsername = username || currentUsername;
+    const user = users.find(u => u.username === profileUsername) || null;
+    setProfileUser(user);
+
+    if (user) {
+      // Filtrer et associer les critiques de l'utilisateur
+      const userReviewsData = reviews
+        .filter(review => review.username === user.username)
+        .map(review => {
+          const movie = movies.find(m => m.id === review.movieId);
+          return { ...review, movie: movie! };
+        })
+        .filter(item => item.movie);
+
+      setUserReviews(userReviewsData);
+    }
+
+    setIsLoading(false);
+  }, [username, users]);
+
+  const isOwnProfile = username === "gora" || !username; // "gora" est l'utilisateur connecté
+  const otherUsers = users.filter(user => user.username !== (username || "gora"));
+
+  const averageRating = userReviews.length > 0 
+    ? (userReviews.reduce((acc, review) => acc + review.rating, 0) / userReviews.length).toFixed(1)
+    : '0.0';
+
+  const formatJoinDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('fr-FR', { 
+      year: 'numeric', 
+      month: 'long' 
+    });
+  };
+
+  if (isLoading) {
     return (
-      <div className="flex items-center space-x-1">
-        {[1, 2, 3, 4, 5].map((star) => {
-          let starClass = "text-gray-600";
-          if (star <= Math.floor(rating)) {
-            starClass = "text-yellow-400";
-          } else if (star === Math.ceil(rating) && rating % 1 >= 0.5) {
-            starClass = "text-yellow-400";
-          }
-          return (
-            <svg
-              key={star}
-              className={`w-4 h-4 ${starClass}`}
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-            </svg>
-          );
-        })}
-        <span className="text-gray-400 text-sm ml-1">
-          ({rating.toFixed(1)})
-        </span>
+      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-xl">Chargement du profil...</p>
+        </div>
       </div>
     );
-  };
+  }
 
-  // Fonction pour générer un placeholder si l'image ne charge pas
-  const handleImageError = (
-    e: React.SyntheticEvent<HTMLImageElement, Event>,
-    movieTitle: string
-  ) => {
-    const target = e.target as HTMLImageElement;
-    // Créer un placeholder avec le titre du film
-    target.src = `https://via.placeholder.com/300x400/374151/ffffff?text=${encodeURIComponent(
-      movieTitle
-    )}`;
-    target.className = "w-full h-full object-cover bg-gray-700";
-  };
+  if (!profileUser) {
+    return (
+      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Utilisateur non trouvé</h1>
+          <p className="text-gray-400 mb-6">Le profil @{username} n'existe pas.</p>
+          <button 
+            onClick={() => navigate('/profile')}
+            className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+          >
+            Retour à mon profil
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-900 pt-16">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Section Profil Utilisateur */}
-        <div className="bg-gray-800 rounded-2xl shadow-lg p-6 mb-8 border border-gray-700">
-          <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-            {/* Avatar */}
-            <div className="flex-shrink-0">
+    <div className="min-h-screen bg-gray-900 text-white py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* En-tête du profil */}
+        <div className="bg-gray-800 rounded-2xl p-6 mb-8 border border-gray-700">
+          <div className="flex flex-col lg:flex-row items-center gap-8">
+            <div className="flex flex-col items-center lg:items-start">
               <img
-                src={user.avatar}
-                alt={user.username}
-                className="w-24 h-24 rounded-full object-cover border-4 border-gray-600 shadow-lg"
+                src={profileUser.avatar}
+                alt={profileUser.fullName}
+                className="w-32 h-32 rounded-full border-4 border-orange-500 shadow-lg"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
-                  target.src =
-                    "https://via.placeholder.com/150/374151/ffffff?text=USER";
+                  target.src = "https://ui-avatars.com/api/?name=" + encodeURIComponent(profileUser.fullName) + "&size=150&background=f97316&color=fff";
                 }}
               />
+              {isOwnProfile && (
+                <div className="mt-3 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                  Votre profil
+                </div>
+              )}
             </div>
 
-            {/* Informations utilisateur */}
-            <div className="flex-1 text-center md:text-left">
-              <h1 className="text-3xl font-bold text-white mb-2">
-                {user.username}
-              </h1>
-              <p className="text-gray-300 mb-3">{user.email}</p>
-              <p className="text-gray-200 mb-4 leading-relaxed">{user.bio}</p>
-
-              <div className="flex flex-wrap gap-4 text-sm text-gray-400 mb-6">
-                <span className="flex items-center gap-1">
-                  <svg
-                    className="w-4 h-4"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  Membre depuis {user.memberSince}
-                </span>
-                <span>•</span>
-                <span className="flex items-center gap-1">
-                  <svg
-                    className="w-4 h-4"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                  {user.favoriteCount} films favoris
-                </span>
+            <div className="flex-1 text-center lg:text-left">
+              <h1 className="text-4xl font-bold mb-2">{profileUser.fullName}</h1>
+              <p className="text-gray-400 text-xl mb-4">@{profileUser.username}</p>
+              <p className="text-gray-300 text-lg leading-relaxed max-w-3xl mb-6">
+                {profileUser.bio}
+              </p>
+              
+              <div className="flex flex-wrap gap-6 justify-center lg:justify-start">
+                <div className="text-center">
+                  <span className="block text-3xl font-bold text-orange-500">{userReviews.length}</span>
+                  <span className="text-gray-400 text-sm">Critiques publiées</span>
+                </div>
+                <div className="text-center">
+                  <span className="block text-3xl font-bold text-yellow-400">{averageRating}</span>
+                  <span className="text-gray-400 text-sm">Note moyenne</span>
+                </div>
+                <div className="text-center">
+                  <span className="block text-3xl font-bold text-blue-400">
+                    {formatJoinDate(profileUser.joinDate)}
+                  </span>
+                  <span className="text-gray-400 text-sm">Membre depuis</span>
+                </div>
               </div>
-
-              {/* Bouton Modifier le profil */}
-              <button className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold transition duration-200 shadow-md hover:shadow-lg">
-                Modifier le profil
-              </button>
             </div>
+
+            {isOwnProfile && (
+              <button
+                onClick={() => navigate('/profile/edit')}
+                className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-lg font-semibold transition-all duration-300 hover:scale-105 shadow-lg"
+              >
+                ✏️ Modifier le profil
+              </button>
+            )}
           </div>
         </div>
 
-        {/* Section Films Favoris */}
-        <div>
-          <h2 className="text-2xl font-bold text-white mb-6">
-            Films Favoris{" "}
-            <span className="text-orange-400">({movies.length})</span>
-          </h2>
-
-          {/* Grille de films */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-            {movies.map((movie) => (
-              <div
-                key={movie.id}
-                className="bg-gray-800 rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-700"
-              >
-                {/* Image du film avec ratio 3:4 et fallback */}
-                <div className="relative h-64">
-                  <img
-                    src={movie.image}
-                    alt={movie.title}
-                    className="w-full h-full object-cover"
-                    onError={(e) => handleImageError(e, movie.title)}
-                  />
-                </div>
-
-                {/* Contenu de la carte */}
-                <div className="p-4">
-                  <h3 className="font-bold text-lg text-white mb-2 line-clamp-1">
-                    {movie.title}
-                  </h3>
-
-                  <p className="text-gray-300 text-sm mb-3 line-clamp-2 leading-relaxed">
-                    {movie.description}
-                  </p>
-
-                  <div className="flex justify-between items-center mb-4">
-                    <span className="text-orange-400 font-semibold">
-                      {movie.year}
-                    </span>
-                    <StarRating rating={movie.rating} />
-                  </div>
-
-                  {/* Bouton Voir les détails */}
-                  <Link
-                    to={`/films/${movie.id}`}
-                    className="w-full inline-block text-center bg-orange-500 hover:bg-orange-600 text-white px-3 py-2 rounded-lg text-sm transition duration-200 font-semibold shadow-md hover:shadow-lg"
+        <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
+          
+          {/* Section des critiques */}
+          <div className="xl:col-span-3">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold">Critiques publiées</h2>
+              <span className="text-gray-400">
+                {userReviews.length} {userReviews.length === 1 ? 'critique' : 'critiques'}
+              </span>
+            </div>
+            
+            {userReviews.length > 0 ? (
+              <div className="space-y-6">
+                {userReviews.map((review) => (
+                  <div 
+                    key={review.id} 
+                    className="bg-gray-800 rounded-xl p-6 border border-gray-700 hover:border-gray-600 transition-all duration-300"
                   >
-                    Voir les détails
-                  </Link>
-                </div>
+                    <div className="flex flex-col md:flex-row gap-6">
+                      <div className="flex-shrink-0">
+                        <img
+                          src={review.movie.image}
+                          alt={review.movie.title}
+                          className="w-24 h-36 object-cover rounded-lg shadow-md"
+                        />
+                      </div>
+                      
+                      <div className="flex-1">
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-3">
+                          <div>
+                            <h3 className="text-xl font-semibold hover:text-orange-400 transition-colors">
+                              {review.movie.title}
+                            </h3>
+                            <p className="text-gray-400 text-sm">
+                              {review.movie.year} • {review.movie.genre}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <StarRating rating={review.rating} />
+                            <span className="text-gray-400 text-sm">
+                              {review.date}
+                            </span>
+                          </div>
+                        </div>
+
+                        <p className="text-gray-300 mb-4 leading-relaxed">
+                          {review.text}
+                        </p>
+
+                        <div className="flex justify-between items-center pt-4 border-t border-gray-700">
+                          <div className="flex items-center gap-2">
+                            <span className="text-gray-400 text-sm">Note du film:</span>
+                            <StarRating rating={review.movie.rating} size="sm" />
+                          </div>
+                          <span className="text-orange-500 text-sm font-semibold">
+                            {review.movie.rating}/5
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
+            ) : (
+              <div className="bg-gray-800 rounded-xl p-8 text-center border border-gray-700">
+                <div className="text-6xl mb-4">🎬</div>
+                <p className="text-gray-400 text-lg mb-4">
+                  {isOwnProfile 
+                    ? "Vous n'avez pas encore publié de critiques."
+                    : `${profileUser.fullName} n'a pas encore publié de critiques.`
+                  }
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Section autres utilisateurs */}
+          <div className="xl:col-span-1">
+            <h2 className="text-2xl font-bold mb-6">Autres utilisateurs</h2>
+            <div className="space-y-4">
+              {otherUsers.map((user) => (
+                <div 
+                  key={user.username} 
+                  className="bg-gray-800 rounded-xl p-4 border border-gray-700 hover:border-orange-500/50 transition-all duration-300"
+                >
+                  <div className="flex items-center gap-4">
+                    <img
+                      src={user.avatar}
+                      alt={user.fullName}
+                      className="w-12 h-12 rounded-full border-2 border-gray-600"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = "https://ui-avatars.com/api/?name=" + encodeURIComponent(user.fullName) + "&size=48&background=f97316&color=fff";
+                      }}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold truncate">{user.fullName}</h3>
+                      <p className="text-gray-400 text-sm truncate">@{user.username}</p>
+                    </div>
+                    <button
+                      onClick={() => navigate(`/profile/${user.username}`)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors whitespace-nowrap"
+                    >
+                      Voir profil
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

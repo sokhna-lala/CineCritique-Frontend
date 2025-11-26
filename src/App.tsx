@@ -5,6 +5,7 @@ import Login from "./pages/login";
 import Register from "./pages/register";
 import TopRated from "./pages/TopRated";
 import Profile from "./pages/profile";
+import EditProfile from "./pages/EditProfile"; // Nouveau composant pour modifier le profil
 import Films from "./pages/Films";
 import MovieDetail from "./pages/MovieDetail";
 
@@ -35,6 +36,11 @@ export default function App() {
         {/* Profil utilisateur */}
         <Route path="/profile" element={<Profile />} />
         <Route path="/profile/:username" element={<Profile />} />
+
+        {/* Modifier le profil */}
+        <Route path="/profile/edit" element={<EditProfile />} />
+
+        {/* Redirection pour /profil */}
         <Route path="/profil" element={<Navigate to="/profile" replace />} />
 
         {/* Films */}
