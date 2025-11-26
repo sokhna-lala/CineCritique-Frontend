@@ -1,23 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { DEFAULT_MOCK_MOVIES } from "../data/mockMovies";
-
-type CastMember = {
-  id: number;
-  name: string;
-  character?: string;
-  profile_path?: string | null;
-};
-
-type Movie = {
-  id: number;
-  title: string;
-  overview?: string;
-  poster?: string;
-  runtime?: number;
-  genres?: Array<{ id: number; name: string }>;
-  release_date?: string;
-};
+import type { Movie, CastMember } from "../data/mockMovies";
 
 type TMDBGenre = { id: number; name: string };
 type TMDBCredits = {
@@ -74,11 +58,31 @@ export default function MovieDetail() {
           postersByName[`${local.id}.png`] ||
           postersByName[String(local.id)] ||
           postersByName[`${local.id}.jpg`];
+        // Ajout de genres et durée fictifs si manquants
+        const mockGenres = local.genre_ids
+          ? local.genre_ids.map((id) => {
+              // mapping rapide genre TMDb
+              const genreMap: Record<number, string> = {
+                12: "Aventure", 18: "Drame", 10749: "Romance", 35: "Comédie", 53: "Thriller", 36: "Biopic", 9648: "Mystère", 14: "Fantastique"
+              };
+              return { id, name: genreMap[id] || "Genre" };
+            })
+          : [];
         setMovie({
           ...local,
           poster: poster || local.poster,
+          runtime: local.runtime || 120,
+          genres: mockGenres,
         });
-        setCast([]);
+        // Utilise le casting du mock s'il existe
+        if (local.cast && local.cast.length > 0) {
+          setCast(local.cast);
+        } else {
+          setCast([
+            { id: 1, name: "Acteur Principal", character: "Héros", profile_path: null },
+            { id: 2, name: "Actrice Secondaire", character: "Ami(e)", profile_path: null }
+          ]);
+        }
       }
       setLoading(false);
       return;
@@ -149,7 +153,9 @@ export default function MovieDetail() {
                 {movie.release_date} •{" "}
                 {movie.runtime ? `${movie.runtime} min` : "—"}
               </p>
-              <div className="mt-4 text-gray-200">{movie.overview}</div>
+              <div className="mt-4 text-gray-200">
+                <p className="mb-4">{movie.overview || movie.description || "Aucune description disponible."}</p>
+              </div>
 
               <div className="mt-6">
                 <h3 className="font-semibold">Genres</h3>
@@ -170,18 +176,12 @@ export default function MovieDetail() {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-3">
                   {cast.map((c) => (
                     <div key={c.id} className="text-center">
-                      <img
-                        src={
-                          c.profile_path
-                            ? `https://image.tmdb.org/t/p/w200${c.profile_path}`
-                            : `https://via.placeholder.com/200x300?text=${encodeURIComponent(
-                                c.name
-                              )}`
-                        }
-                        alt={c.name}
-                        className="w-full h-40 object-cover rounded"
-                      />
-                      <div className="mt-2 text-sm">{c.name}</div>
+                      <div className="w-full h-40 bg-gradient-to-br from-orange-400 to-orange-600 rounded flex items-center justify-center mb-2">
+                        <div className="text-white text-center px-2">
+                          <div className="text-xs font-semibold truncate">{c.name}</div>
+                        </div>
+                      </div>
+                      <div className="mt-2 text-sm font-semibold">{c.name}</div>
                       <div className="text-xs text-gray-400">{c.character}</div>
                     </div>
                   ))}
