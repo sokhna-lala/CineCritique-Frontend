@@ -27,7 +27,7 @@ export default function MovieDetail() {
     import.meta as unknown as { env: Record<string, string | undefined> }
   ).env.VITE_TMDB_KEY;
 
-  // Load local posters (same strategy as Films.tsx)
+  // Load local posters
   const posterModules = import.meta.glob("../assets/posters/*.{png,jpg,jpeg}", {
     eager: true,
     as: "url",
@@ -47,6 +47,7 @@ export default function MovieDetail() {
   useEffect(() => {
     if (!id) return;
     fetchDetail();
+
     // Load reviews for this movie
     const movieReviews = DEFAULT_MOCK_REVIEWS.filter(
       (r) => String(r.movieId) === String(id) || r.movieId === Number(id)
@@ -58,7 +59,7 @@ export default function MovieDetail() {
   const fetchDetail = async (): Promise<void> => {
     setLoading(true);
     if (!tmdbKey) {
-      // fallback to local mock movie when TMDb key is not configured
+      // fallback to local mock movie
       const local = DEFAULT_MOCK_MOVIES.find(
         (m) => String(m.id) === String(id) || m.id === Number(id)
       );
@@ -67,12 +68,17 @@ export default function MovieDetail() {
           postersByName[`${local.id}.png`] ||
           postersByName[String(local.id)] ||
           postersByName[`${local.id}.jpg`];
-        // Ajout de genres et durée fictifs si manquants
         const mockGenres = local.genre_ids
           ? local.genre_ids.map((id) => {
-              // mapping rapide genre TMDb
               const genreMap: Record<number, string> = {
-                12: "Aventure", 18: "Drame", 10749: "Romance", 35: "Comédie", 53: "Thriller", 36: "Biopic", 9648: "Mystère", 14: "Fantastique"
+                12: "Aventure",
+                18: "Drame",
+                10749: "Romance",
+                35: "Comédie",
+                53: "Thriller",
+                36: "Biopic",
+                9648: "Mystère",
+                14: "Fantastique",
               };
               return { id, name: genreMap[id] || "Genre" };
             })
@@ -83,15 +89,12 @@ export default function MovieDetail() {
           runtime: local.runtime || 120,
           genres: mockGenres,
         });
-        // Utilise le casting du mock s'il existe
-        if (local.cast && local.cast.length > 0) {
-          setCast(local.cast);
-        } else {
-          setCast([
+        setCast(
+          (local.cast || [
             { id: 1, name: "Acteur Principal", character: "Héros", profile_path: null },
-            { id: 2, name: "Actrice Secondaire", character: "Ami(e)", profile_path: null }
-          ]);
-        }
+            { id: 2, name: "Actrice Secondaire", character: "Ami(e)", profile_path: null },
+          ]).map((c) => ({ ...c, character: c.character || "" }))
+        );
       }
       setLoading(false);
       return;
@@ -119,7 +122,7 @@ export default function MovieDetail() {
         (credits?.cast || []).slice(0, 8).map((c) => ({
           id: c.id,
           name: c.name,
-          character: c.character,
+          character: c.character || "",
           profile_path: c.profile_path,
         }))
       );
@@ -184,9 +187,7 @@ export default function MovieDetail() {
               <img
                 src={
                   movie.poster ||
-                  `https://via.placeholder.com/400x600?text=${encodeURIComponent(
-                    movie.title
-                  )}`
+                  `https://via.placeholder.com/400x600?text=${encodeURIComponent(movie.title)}`
                 }
                 alt={movie.title}
                 className="w-full rounded"
@@ -196,21 +197,19 @@ export default function MovieDetail() {
             <div className="md:col-span-2">
               <h1 className="text-3xl font-bold">{movie.title}</h1>
               <p className="text-sm text-gray-300 mt-2">
-                {movie.release_date} •{" "}
-                {movie.runtime ? `${movie.runtime} min` : "—"}
+                {movie.release_date} • {movie.runtime ? `${movie.runtime} min` : "—"}
               </p>
               <div className="mt-4 text-gray-200">
-                <p className="mb-4">{movie.overview || movie.description || "Aucune description disponible."}</p>
+                <p className="mb-4">
+                  {movie.overview || movie.description || "Aucune description disponible."}
+                </p>
               </div>
 
               <div className="mt-6">
                 <h3 className="font-semibold">Genres</h3>
                 <div className="flex gap-2 mt-2 flex-wrap">
                   {(movie.genres || []).map((g) => (
-                    <span
-                      key={g.id}
-                      className="bg-gray-800 px-3 py-1 rounded text-sm"
-                    >
+                    <span key={g.id} className="bg-gray-800 px-3 py-1 rounded text-sm">
                       {g.name}
                     </span>
                   ))}
@@ -222,10 +221,16 @@ export default function MovieDetail() {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-3">
                   {cast.map((c) => (
                     <div key={c.id} className="text-center">
-                      <div className="w-full h-40 bg-linear-to-br from-orange-400 to-orange-600 rounded flex items-center justify-center mb-2">
-                        <div className="text-white text-center px-2">
-                          <div className="text-xs font-semibold truncate">{c.name}</div>
-                        </div>
+                      <div className="w-full h-40 bg-gray-700 rounded flex items-center justify-center mb-2">
+                        {c.profile_path ? (
+                          <img
+                            src={c.profile_path}
+                            alt={c.name}
+                            className="w-full h-full object-cover rounded"
+                          />
+                        ) : (
+                          <span className="text-gray-300 text-xs px-2">{c.name}</span>
+                        )}
                       </div>
                       <div className="mt-2 text-sm font-semibold">{c.name}</div>
                       <div className="text-xs text-gray-400">{c.character}</div>
@@ -260,9 +265,7 @@ export default function MovieDetail() {
                   <h4 className="font-semibold mb-4">Ajouter une critique</h4>
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium mb-1">
-                        Votre nom
-                      </label>
+                      <label className="block text-sm font-medium mb-1">Votre nom</label>
                       <input
                         type="text"
                         value={newReview.author}
@@ -275,26 +278,18 @@ export default function MovieDetail() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-1">
-                        Votre note
-                      </label>
+                      <label className="block text-sm font-medium mb-1">Votre note</label>
                       <div className="flex gap-2 items-center">
                         <StarRating
                           rating={newReview.rating}
-                          onRate={(r) =>
-                            setNewReview({ ...newReview, rating: r })
-                          }
+                          onRate={(r) => setNewReview({ ...newReview, rating: r })}
                         />
-                        <span className="text-sm text-gray-400">
-                          {newReview.rating}/5
-                        </span>
+                        <span className="text-sm text-gray-400">{newReview.rating}/5</span>
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-1">
-                        Votre critique
-                      </label>
+                      <label className="block text-sm font-medium mb-1">Votre critique</label>
                       <textarea
                         value={newReview.text}
                         onChange={(e) =>
