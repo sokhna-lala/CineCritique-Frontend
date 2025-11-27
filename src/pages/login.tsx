@@ -25,9 +25,16 @@ const Login: React.FC = () => {
     e.preventDefault();
     setLoading(true);
 
-    // Simulation d'une connexion réussie
+    // Simulation d'une connexion
     setTimeout(() => {
       setLoading(false);
+
+      // Exemple simple de validation
+      if (!formData.email || !formData.password) {
+        setError("Email et mot de passe requis");
+        return;
+      }
+
       navigate("/"); // Redirection après connexion
     }, 1500);
   };
